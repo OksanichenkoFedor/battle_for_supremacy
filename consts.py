@@ -1,0 +1,29 @@
+BACKGROUND_COLOR = (20, 20, 20)
+HEX_COLORS = [
+    (255, 0, 0),       # Красный
+    (173, 255, 47),    # Салатовый
+    (138, 43, 226),    # Фиолетовый
+    (30, 144, 255),    # Синий
+    (255, 165, 0),     # Оранжевый
+    (64, 224, 208),    # Бирюзовый
+]
+
+BASE_HEX_COLOR = (255, 255, 255)
+BORDER_COLOR = (128, 128, 128)
+BORDER_WIDTH = 4
+TEXT_COLOR = (0, 0, 0)
+
+WIDTH, HEIGHT = 1400, 1100
+
+HEX_COUNT = 8
+
+BUTTON_CHOOSEN_WIDTH = 6
+BUTTON_UNCHOOSEN_WIDTH = 4
+BUTTON_CHOOSEN_COLOR = (150, 150, 150)
+BUTTON_UNCHOOSEN_COLOR = (70, 70, 70)
+BUTTON_SIZE = 50
+
+
+BUTTON_SPACING = 70
+BUTTON_X = WIDTH - 2*BUTTON_SIZE
+BUTTON_Y = HEIGHT//2 - (len(HEX_COLORS)//2)*BUTTON_SPACING - BUTTON_SIZE//2
