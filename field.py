@@ -114,7 +114,7 @@ class Field:
         self.draw_status()
 
     def draw_status(self):
-        pygame.draw.rect(self.screen, BACKGROUND_COLOR, (0, 0, 100*(len(HEX_COLORS)), 90))
+        pygame.draw.rect(self.screen, BASE_HEX_COLOR, (0, 0, 100*(len(HEX_COLORS)+2), 80))
         font = pygame.font.SysFont(None, 70)
 
         for i in range(len(HEX_COLORS)):
