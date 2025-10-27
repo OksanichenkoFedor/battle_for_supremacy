@@ -3,16 +3,41 @@ import pygame
 from cluster_finder import ClusterFinder
 from consts import HEX_COLORS, BACKGROUND_COLOR, HEX_COUNT, HEIGHT, BASE_HEX_COLOR
 from hexagon import Hexagon
+from saver_loader import SaverLoader
 
 
 class Field:
     def __init__(self, side_size, screen):
         self.side_size = side_size
+        self.num_iter = 0
+        self.color_hex = 0
         self.radius = self.side_size - 1
-
+        self.save_loader = SaverLoader(self)
         self.screen = screen
         self.generate_field()
         self.update()
+
+    def load(self):
+        self.reset()
+        field_dict = self.save_loader.load()
+        self.hexagons = []
+        self.cubic_hexagons = []
+        for i in range(2 * self.radius + 1):
+            self.cubic_hexagons.append([False] * (2 * self.radius + 1))
+        self.IDs = []
+        for i in range(len(field_dict["id"])):
+            curr_id, r, q = int(field_dict["id"][i]), int(field_dict["r"][i]), int(field_dict["q"][i])
+            size, color_id, is_team_base = (int(field_dict["size"][i]), int(field_dict["color_id"][i]),
+                                            bool(field_dict["is_team_base"][i]))
+            hex = Hexagon(q, r, curr_id, size=size)
+            hex.color_id, hex.is_team_base = color_id, is_team_base
+            self.hexagons.append(hex)
+            self.cubic_hexagons[q + self.radius][r + self.radius] = hex
+            self.IDs.append(curr_id)
+        self.update()
+
+
+
 
     def generate_field(self):
         self.hexagons = []
@@ -44,7 +69,7 @@ class Field:
         return self.cubic_hexagons[q+self.radius][r+self.radius]
 
     def reset(self):
-        for i in range(self.hexagons):
+        for i in range(len(self.hexagons)):
             self.hexagons[i].reset_color()
         #self.update_all()
 
@@ -55,12 +80,18 @@ class Field:
             for nearest in nearest_hexes:
                 if nearest.color_id==color_id:
                     found_same_color = True
+            if color_id == -1:
+                found_same_color = True
+
             if found_same_color:
                 self.simple_change_color(id, color_id)
         self.update()
+        self.save_loader.save()
         self.draw_status()
 
     def simple_change_color(self, id, color_id):
+        if color_id!=-1:
+            self.color_hex += color_id
         self.hexagons[id].change_color(color_id)
         self.hexagons[id].draw(self.screen)
 
@@ -71,6 +102,7 @@ class Field:
         return -1
 
     def update(self):
+        self.num_iter+=1
         continue_clustering = True
         while continue_clustering:
             continue_clustering = False
@@ -114,7 +146,7 @@ class Field:
         self.draw_status()
 
     def draw_status(self):
-        pygame.draw.rect(self.screen, BASE_HEX_COLOR, (0, 0, 100*(len(HEX_COLORS)+2), 80))
+        pygame.draw.rect(self.screen, BACKGROUND_COLOR, (0, 0, 100*(len(HEX_COLORS)+2), 80))
         font = pygame.font.SysFont(None, 70)
 
         for i in range(len(HEX_COLORS)):

@@ -2,7 +2,7 @@ import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 bot = telebot.TeleBot("7947796403:AAGIFYeh-VGlN3f-guPPBMg2APV1tAQyEDU", parse_mode=None)
-
+ids_colors = {}
 
 
 # Цвета для выбора (те же что и в Pygame)

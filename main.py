@@ -9,6 +9,7 @@ import sys
 from consts import WIDTH, HEIGHT, HEX_COLORS, HEX_COUNT, BACKGROUND_COLOR
 from field import Field
 from hexagon import Hexagon
+from load_button import LoadButton
 from painting import Painting
 
 # Количество шестиугольников на стороне
@@ -16,7 +17,7 @@ from painting import Painting
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Шестиугольное поле - Катан")
+pygame.display.set_caption("Битва за господство")
 
 # Цвета
   # Серый
@@ -85,11 +86,16 @@ def main():
     field = Field(HEX_COUNT, screen)
     painting = Painting(screen)
 
+    load_button = LoadButton(20, HEIGHT - 60, 120, 40, "Загрузить", field, screen)
+    #field.load_button = load_button
+
     # Запускаем поток ввода в фоновом режиме
     input_thread_obj = threading.Thread(target=input_thread, daemon=True)
     input_thread_obj.start()
+
     field.draw()
     painting.draw()
+    load_button.draw()
     while running:
         # Обработка событий Pygame
         for event in pygame.event.get():
@@ -101,7 +107,11 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Левая кнопка мыши
                     mouse_pos = pygame.mouse.get_pos()
-
+                    if load_button.is_clicked(mouse_pos):
+                        field.draw()
+                        painting.draw()
+                        load_button.draw()
+                        field.draw_status()
                     button_clicked = False
                     id = painting.is_clicked(mouse_pos)
                     if id!=-1:
@@ -113,11 +123,6 @@ def main():
                     if not button_clicked:
                         id = field.contains_point(mouse_pos)
                         if id != -1:
-                            #new_color = HEX_COLORS[random.randint(0, 5)]
-                            near_hexes = field.get_adjacent_hexagons(id)
-                            for point in near_hexes:
-                                pass
-                                #field.change_color(point.id, painting.get_current_color_id())
                             field.change_color(id, painting.get_current_color_id())
 
 
