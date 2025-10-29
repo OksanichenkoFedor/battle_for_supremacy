@@ -1,12 +1,14 @@
 import math
+import random
 
 import pygame
 
-from consts import WIDTH, HEIGHT, BORDER_COLOR, TEXT_COLOR, BORDER_WIDTH, BASE_HEX_COLOR, HEX_COLORS
+from consts import WIDTH, HEIGHT, BORDER_COLOR, TEXT_COLOR, BORDER_WIDTH, BASE_HEX_COLOR, HEX_COLORS, STAR_COLOR, \
+    SPARKLE_COLOR, HEX_SIZE
 
 
 class Hexagon:
-    def __init__(self, q, r, id, size=40):
+    def __init__(self, q, r, id, size=HEX_SIZE, is_star=False):
         self.q = q  # координата q (кубическая система координат)
         self.r = r  # координата r (кубическая система координат)
         self.id = id
@@ -14,6 +16,7 @@ class Hexagon:
         self.color_id = -1
         self.calculate_pixel_position()
         self.is_team_base = False
+        self.is_star = is_star
 
     def calculate_pixel_position(self):
         """Переводит кубические координаты в пиксельные"""
@@ -33,6 +36,39 @@ class Hexagon:
             vertices.append((x, y))
         return vertices
 
+    def draw_star(self, surface):
+        """Рисует звезду с блестками"""
+
+        star_radius = self.size * 0.6  # Размер звезды
+
+        # Рисуем основную звезду (5 лучей)
+        points = []
+        for i in range(10):
+            angle = math.pi / 2 + i * math.pi / 5
+            radius = star_radius if i % 2 == 0 else star_radius * 0.4
+            x = self.x + radius * math.cos(angle)
+            y = self.y + radius * math.sin(angle)
+            points.append((x, y))
+
+        pygame.draw.polygon(surface, STAR_COLOR, points)
+
+        # Добавляем блестки (маленькие кружки вокруг звезды)
+        for i in range(8):
+            angle = random.uniform(0, 2 * math.pi)
+            distance = random.uniform(star_radius * 0.7, star_radius * 1.2)
+            sparkle_x = self.x + distance * math.cos(angle)
+            sparkle_y = self.y + distance * math.sin(angle)
+            sparkle_radius = random.uniform(1, 3)
+            pygame.draw.circle(surface, SPARKLE_COLOR, (int(sparkle_x), int(sparkle_y)), sparkle_radius)
+
+        # Добавляем внутреннее свечение
+        for i in range(3):
+            glow_radius = star_radius * (0.3 + i * 0.2)
+            glow_surface = pygame.Surface((int(glow_radius * 2), int(glow_radius * 2)), pygame.SRCALPHA)
+            pygame.draw.circle(glow_surface, (*STAR_COLOR, 50), (int(glow_radius), int(glow_radius)), int(glow_radius))
+            surface.blit(glow_surface, (self.x - glow_radius, self.y - glow_radius),
+                         special_flags=pygame.BLEND_ALPHA_SDL2)
+
     def draw(self, surface):
         """Рисует шестиугольник"""
         vertices = self.get_vertices()
@@ -44,6 +80,8 @@ class Hexagon:
         pygame.draw.polygon(surface, color, vertices)
         pygame.draw.polygon(surface, BORDER_COLOR, vertices, BORDER_WIDTH)
 
+        if self.is_star:
+            self.draw_star(surface)
         self.draw_coordinates(surface)
 
     def draw_coordinates(self, surface):
@@ -88,3 +126,20 @@ class Hexagon:
     def reset_color(self):
         """Сбрасывает цвет к исходному"""
         self.color_id = -1
+
+
+def hex_pixel_distance(hex1, hex2):
+    # Вычисляем пиксельные координаты центров
+    if hex1.size!=hex2.size:
+        raise Exception("different hexes")
+    hex_size = hex1.size
+    x1 = hex_size * (math.sqrt(3) * hex1.q + math.sqrt(3) / 2 * hex1.r)
+    y1 = hex_size * (3 / 2 * hex1.r)
+
+    x2 = hex_size * (math.sqrt(3) * hex2.q + math.sqrt(3) / 2 * hex2.r)
+    y2 = hex_size * (3 / 2 * hex2.r)
+
+    # Евклидово расстояние
+    distance = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+    return distance

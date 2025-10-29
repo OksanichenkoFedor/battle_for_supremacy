@@ -28,7 +28,8 @@ class SaverLoader:
             "r": [],
             "size": [],
             "color_id": [],
-            "is_team_base": []
+            "is_team_base": [],
+            "is_star": []
         }
         for hexagon in self.field.hexagons:
             field_dict["id"].append(hexagon.id)
@@ -37,5 +38,6 @@ class SaverLoader:
             field_dict["size"].append(hexagon.size)
             field_dict["color_id"].append(hexagon.color_id)
             field_dict["is_team_base"].append(hexagon.is_team_base)
+            field_dict["is_star"].append(hexagon.is_star)
         conf = OmegaConf.create(field_dict)
         OmegaConf.save(config=conf, f="field_dict.yaml")

@@ -1,8 +1,11 @@
 import pygame
+import numpy as np
+import random
 
 from cluster_finder import ClusterFinder
-from consts import HEX_COLORS, BACKGROUND_COLOR, HEX_COUNT, HEIGHT, BASE_HEX_COLOR
-from hexagon import Hexagon
+from consts import HEX_COLORS, BACKGROUND_COLOR, HEX_COUNT, HEIGHT, BASE_HEX_COLOR, MIN_NUM_STAR_POINTS, \
+    MAX_NUM_STAR_POINTS, BETA, TEAM_BASE_COEFF, NUM_STAR
+from hexagon import Hexagon, hex_pixel_distance
 from saver_loader import SaverLoader
 
 
@@ -29,8 +32,9 @@ class Field:
             curr_id, r, q = int(field_dict["id"][i]), int(field_dict["r"][i]), int(field_dict["q"][i])
             size, color_id, is_team_base = (int(field_dict["size"][i]), int(field_dict["color_id"][i]),
                                             bool(field_dict["is_team_base"][i]))
+            is_star = bool(field_dict["is_star"][i])
             hex = Hexagon(q, r, curr_id, size=size)
-            hex.color_id, hex.is_team_base = color_id, is_team_base
+            hex.color_id, hex.is_team_base, hex.is_star = color_id, is_team_base, is_star
             self.hexagons.append(hex)
             self.cubic_hexagons[q + self.radius][r + self.radius] = hex
             self.IDs.append(curr_id)
@@ -42,6 +46,7 @@ class Field:
     def generate_field(self):
         self.hexagons = []
         self.cubic_hexagons = []
+        self.hexes_of_forse = []
         for i in range(2*self.radius+1):
             self.cubic_hexagons.append([False]*(2*self.radius+1))
         self.IDs = []
@@ -64,6 +69,28 @@ class Field:
                 self.hexagons[id].change_color(team_id)
                 self.hexagons[id].is_team_base = True
                 team_id+=1
+                self.hexes_of_forse.append(self.hexagons[id])
+        for _ in range(NUM_STAR):
+            self.find_new_start_hex()
+
+    def count_energy(self, curr_hex):
+        value = 0
+        for hex in self.hexes_of_forse:
+            curr_dist = hex_pixel_distance(hex, curr_hex)+0.001
+            if hex.is_team_base:
+                curr_dist*=1.0/TEAM_BASE_COEFF
+            value+=1.0/(1.0*curr_dist)
+        value = value/(1.0*len(self.hexes_of_forse))
+        return value
+
+    def find_new_start_hex(self):
+        energies = []
+        for i in range(len(self.hexagons)):
+            energies.append(self.count_energy(self.hexagons[i]))
+        id = boltzmann_selection(energies, BETA)
+        self.hexagons[id].is_star = True
+        self.hexes_of_forse.append(self.hexagons[id])
+
 
     def get_hex_from_cubic(self,q,r):
         return self.cubic_hexagons[q+self.radius][r+self.radius]
@@ -84,7 +111,18 @@ class Field:
                 found_same_color = True
 
             if found_same_color:
+
+                if self.hexagons[id].is_star:
+                    nearest_hexes = self.get_adjacent_hexagons(id)
+                    random.shuffle(nearest_hexes)
+                    num_points = np.random.randint(MIN_NUM_STAR_POINTS,MAX_NUM_STAR_POINTS+1)
+                    for i in range(len(nearest_hexes)):
+                        if nearest_hexes[i].color_id!=color_id and num_points>0:
+                            self.simple_change_color(nearest_hexes[i].id, color_id)
+                            num_points-=1
+                    self.hexagons[id].is_star=False
                 self.simple_change_color(id, color_id)
+
         self.update()
         self.save_loader.save()
         self.draw_status()
@@ -154,7 +192,7 @@ class Field:
             text_surface = font.render(text, True, HEX_COLORS[i])
             self.screen.blit(text_surface, (60 + 100*i, 10))
 
-    def get_adjacent_hexagons(self, id):
+    def get_adjacent_hexagons(self, id) -> list[Hexagon]:
 
         q, r = self.hexagons[id].q, self.hexagons[id].r
         # Направления в кубических координатах (q, r, s)
@@ -178,3 +216,13 @@ class Field:
                 adjacent.append(self.get_hex_from_cubic(nq, nr))
                 #print(self.cubic_hexagons[nq][nr].id)
         return adjacent
+
+
+def boltzmann_selection(energies, beta):
+    energies = np.array(energies)
+    min_energy = np.min(energies)
+    weights = np.exp(-beta * (energies - min_energy))
+    probabilities = weights / np.sum(weights)
+    selected_index = np.random.choice(len(energies), p=probabilities)
+
+    return selected_index

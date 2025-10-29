@@ -4,13 +4,14 @@ HEX_COLORS = [
     (173, 255, 47),    # Салатовый
     (138, 43, 226),    # Фиолетовый
     (30, 144, 255),    # Синий
-    (255, 165, 0),     # Оранжевый
+    (255, 255, 0),     # Жёлтый
     (64, 224, 208),    # Бирюзовый
 ]
 
 BASE_HEX_COLOR = (255, 255, 255)
 BORDER_COLOR = (128, 128, 128)
 BORDER_WIDTH = 4
+HEX_SIZE = 40
 TEXT_COLOR = (0, 0, 0)
 
 WIDTH, HEIGHT = 1400, 1100
@@ -30,3 +31,14 @@ BUTTON_Y = HEIGHT//2 - (len(HEX_COLORS)//2)*BUTTON_SPACING - BUTTON_SIZE//2
 
 LOAD_BUTTON_COLOR = (255, 255, 255)
 LOAD_BUTTON_TEXT_COLOR = (0, 0, 0)
+
+MIN_NUM_STAR_POINTS = 1
+MAX_NUM_STAR_POINTS = 3
+
+STAR_COLOR = (255, 215, 0)      # Золотой цвет звезды
+SPARKLE_COLOR = (255, 255, 0) # Цвет блесток
+
+
+BETA = 50000.0
+NUM_STAR = 5
+TEAM_BASE_COEFF =8.0
