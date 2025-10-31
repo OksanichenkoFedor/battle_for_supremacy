@@ -1,3 +1,6 @@
+from hexagon import hex_pixel_distance, Hexagon
+
+
 class ClusterFinder:
     def __init__(self, field):
         self.field = field
@@ -50,3 +53,10 @@ class Cluster:
         #print("redraw",self.cluster_type, new_color_id, self.cluster_elements)
         for hex_id in self.cluster_elements:
             self.field.simple_change_color(hex_id, new_color_id)
+
+    def count_mean_dist(self, hex: Hexagon):
+        curr_dist = 0.0
+        for curr_hex_id in self.cluster_elements:
+            curr_dist += hex_pixel_distance(hex, self.field.hexagons[curr_hex_id])
+        curr_dist = curr_dist / (1.0*len(self.cluster_elements))
+        return curr_dist

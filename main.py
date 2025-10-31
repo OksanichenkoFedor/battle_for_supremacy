@@ -6,6 +6,7 @@ import time
 import random
 import sys
 
+from attack_button import AttackButton
 from attack_line import draw_line
 from consts import WIDTH, HEIGHT, HEX_COLORS, HEX_COUNT, BACKGROUND_COLOR
 from field import Field
@@ -87,7 +88,8 @@ def main():
     field = Field(HEX_COUNT, screen)
     painting = Painting(screen)
 
-    load_button = LoadButton(20, HEIGHT - 60, 120, 40, "Загрузить", field, screen)
+    load_button = LoadButton(20, HEIGHT - 80, 150, 60, "Загрузить", field, screen)
+    attack_button = AttackButton(250, HEIGHT - 80, 150, 60, field, screen)
     #field.load_button = load_button
 
     # Запускаем поток ввода в фоновом режиме
@@ -97,6 +99,7 @@ def main():
     field.draw()
     painting.draw()
     load_button.draw()
+    attack_button.draw()
     drawing_line = False
     attack_color_id, defend_color_id = None, None
     while running:
@@ -125,6 +128,13 @@ def main():
                         field.draw()
                         painting.draw()
                         load_button.draw()
+                        attack_button.draw()
+                        field.draw_status()
+                    if attack_button.is_clicked(mouse_pos):
+                        field.draw()
+                        painting.draw()
+                        load_button.draw()
+                        attack_button.draw()
                         field.draw_status()
                     button_clicked = False
                     id = painting.is_clicked(mouse_pos)
@@ -149,6 +159,7 @@ def main():
                         field.draw()
                         painting.draw()
                         load_button.draw()
+                        attack_button.draw()
                         field.draw_status()
                         line_end = pygame.mouse.get_pos()
                     else:
@@ -199,6 +210,7 @@ def main():
         field.draw()
         painting.draw()
         load_button.draw()
+        attack_button.draw()
         field.draw_status()
         if drawing_line:
             draw_line(screen, line_start, line_end, attack_color_id)

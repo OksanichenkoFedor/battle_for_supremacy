@@ -1,3 +1,4 @@
+import time
 from operator import truediv
 
 import pygame
@@ -6,7 +7,7 @@ import random
 
 from cluster_finder import ClusterFinder
 from consts import HEX_COLORS, BACKGROUND_COLOR, HEX_COUNT, HEIGHT, BASE_HEX_COLOR, MIN_NUM_STAR_POINTS, \
-    MAX_NUM_STAR_POINTS, BETA, TEAM_BASE_COEFF, NUM_STAR
+    MAX_NUM_STAR_POINTS, BETA, TEAM_BASE_COEFF, NUM_STAR, TIME_PER_ATTACK
 from hexagon import Hexagon, hex_pixel_distance
 from saver_loader import SaverLoader
 
@@ -19,7 +20,7 @@ class Field:
         self.radius = self.side_size - 1
         self.save_loader = SaverLoader(self)
         self.screen = screen
-        self.regime = 'Нападение'
+        self.regime = "Нападение"
         self.generate_field()
         self.update()
 
@@ -173,7 +174,7 @@ class Field:
             if hex.color_id!=-1:
                 self.counts[hex.color_id]+=1
 
-    def attack(self, attack_color_id, defend_color_id, size=0.5):
+    def attack(self, attack_color_id, defend_color_id):
         cluster_finder = ClusterFinder(self)
         attack_cluster, defend_cluster = None, None
         found = False
@@ -189,8 +190,32 @@ class Field:
                     found = True
                     defend_cluster = cluster
         if found:
-            print("Attack: ",attack_color_id, len(attack_cluster.cluster_elements))
+            if self.regime == "Нападение":
+                size = 0.25
+            elif self.regime == "Война":
+                size = 0.5
+
+            num = int(size*len(defend_cluster.cluster_elements))
+            print(self.regime, num)
+            print("Attack: ", attack_color_id, len(attack_cluster.cluster_elements))
             print("Defend: ", defend_color_id, len(defend_cluster.cluster_elements))
+
+            distes = []
+            for i in range(len(defend_cluster.cluster_elements)):
+                curr_hex = self.hexagons[defend_cluster.cluster_elements[i]]
+                distes.append(attack_cluster.count_mean_dist(curr_hex))
+            sorted_cluster_elements = [a for a, b in sorted(zip(defend_cluster.cluster_elements, distes), key=lambda x: x[1])]
+            for i in range(num):
+                time.sleep(TIME_PER_ATTACK)
+                self.simple_change_color(sorted_cluster_elements[i], attack_color_id)
+                self.draw()
+                self.count_colors()
+                self.draw_status()
+                pygame.display.flip()
+            print(sorted_cluster_elements)
+            print("---")
+
+            self.update()
 
 
 

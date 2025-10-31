@@ -4,9 +4,9 @@ from consts import LOAD_BUTTON_COLOR, LOAD_BUTTON_TEXT_COLOR
 
 
 class AttackButton:
-    def __init__(self, x, y, width, height, text, field, screen, color=LOAD_BUTTON_COLOR, text_color=LOAD_BUTTON_TEXT_COLOR):
+    def __init__(self, x, y, width, height, field, screen, color=LOAD_BUTTON_COLOR, text_color=LOAD_BUTTON_TEXT_COLOR):
         self.rect = pygame.Rect(x, y, width, height)
-        self.text = text
+        self.text = "Нападение"
         self.color = color
         self.field = field
         self.field.load_button = self
@@ -27,6 +27,11 @@ class AttackButton:
     def is_clicked(self, pos):
         if self.rect.collidepoint(pos):
             print("Load")
-            self.field.load()
+            if self.text == "Нападение":
+                self.field.regime = "Война"
+                self.text = "Война"
+            else:
+                self.field.regime = "Нападение"
+                self.text = "Нападение"
             return True
         return False

@@ -3,7 +3,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from consts import HEX_COLORS, HEX_COLORS_NAMES, ADMIN_ID, HEX_COLORS_DICT
 
-bot = telebot.TeleBot("7539891901:AAGF7OIwnxoSH3lrbV0aFetRm8tyiJeADmQ", parse_mode=None)
+bot = telebot.TeleBot("token", parse_mode=None)
 ids_colors = {}
 
 
