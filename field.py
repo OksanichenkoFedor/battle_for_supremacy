@@ -1,3 +1,5 @@
+from operator import truediv
+
 import pygame
 import numpy as np
 import random
@@ -17,6 +19,7 @@ class Field:
         self.radius = self.side_size - 1
         self.save_loader = SaverLoader(self)
         self.screen = screen
+        self.regime = 'Нападение'
         self.generate_field()
         self.update()
 
@@ -170,6 +173,24 @@ class Field:
             if hex.color_id!=-1:
                 self.counts[hex.color_id]+=1
 
+    def attack(self, attack_color_id, defend_color_id, size=0.5):
+        cluster_finder = ClusterFinder(self)
+        attack_cluster, defend_cluster = None, None
+        found = False
+        for cluster in cluster_finder.clusters:
+            border_types = cluster.find_border_types()
+            self_type = cluster.cluster_type
+            if self_type == attack_color_id:
+                if defend_color_id in border_types:
+                    found = True
+                    attack_cluster = cluster
+            elif self_type == defend_color_id:
+                if attack_color_id in border_types:
+                    found = True
+                    defend_cluster = cluster
+        if found:
+            print("Attack: ",attack_color_id, len(attack_cluster.cluster_elements))
+            print("Defend: ", defend_color_id, len(defend_cluster.cluster_elements))
 
 
 

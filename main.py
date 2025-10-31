@@ -6,6 +6,7 @@ import time
 import random
 import sys
 
+from attack_line import draw_line
 from consts import WIDTH, HEIGHT, HEX_COLORS, HEX_COUNT, BACKGROUND_COLOR
 from field import Field
 from hexagon import Hexagon
@@ -96,6 +97,8 @@ def main():
     field.draw()
     painting.draw()
     load_button.draw()
+    drawing_line = False
+    attack_color_id, defend_color_id = None, None
     while running:
         # Обработка событий Pygame
         for event in pygame.event.get():
@@ -105,7 +108,18 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Левая кнопка мыши
+                if event.button == 3:# Правая кнопка мыши
+                    mouse_pos = pygame.mouse.get_pos()
+                    id = field.contains_point(mouse_pos)
+                    if id != -1:
+                        if field.hexagons[id].color_id!=-1:
+                            attack_color_id = field.hexagons[id].color_id
+                            field.change_color(id, painting.get_current_color_id())
+
+                            drawing_line = True
+                            line_start = pygame.mouse.get_pos()
+                            line_end = line_start
+                elif event.button == 1:  # Левая кнопка мыши
                     mouse_pos = pygame.mouse.get_pos()
                     if load_button.is_clicked(mouse_pos):
                         field.draw()
@@ -124,6 +138,26 @@ def main():
                         id = field.contains_point(mouse_pos)
                         if id != -1:
                             field.change_color(id, painting.get_current_color_id())
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 3 and drawing_line:  # Отпускание правой кнопки
+                    # Завершение рисования линии
+                    id = field.contains_point(pygame.mouse.get_pos())
+                    if id != -1:
+                        defend_color_id = field.hexagons[id].color_id
+                        field.attack(attack_color_id, defend_color_id)
+                        field.update()
+                        field.draw()
+                        painting.draw()
+                        load_button.draw()
+                        field.draw_status()
+                        line_end = pygame.mouse.get_pos()
+                    else:
+                        line_end = None
+                    drawing_line = False
+            elif event.type == pygame.MOUSEMOTION:
+                if drawing_line:
+                    # Обновляем конец линии при движении мыши
+                    line_end = pygame.mouse.get_pos()
 
 
 
@@ -162,8 +196,12 @@ def main():
             pass
 
         # Отрисовка
-        #field.draw()
-        #painting.draw()
+        field.draw()
+        painting.draw()
+        load_button.draw()
+        field.draw_status()
+        if drawing_line:
+            draw_line(screen, line_start, line_end, attack_color_id)
 
         pygame.display.flip()
         clock.tick(60)
