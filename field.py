@@ -205,13 +205,18 @@ class Field:
                 curr_hex = self.hexagons[defend_cluster.cluster_elements[i]]
                 distes.append(attack_cluster.count_mean_dist(curr_hex))
             sorted_cluster_elements = [a for a, b in sorted(zip(defend_cluster.cluster_elements, distes), key=lambda x: x[1])]
-            for i in range(num):
-                time.sleep(TIME_PER_ATTACK)
-                self.simple_change_color(sorted_cluster_elements[i], attack_color_id)
-                self.draw()
-                self.count_colors()
-                self.draw_status()
-                pygame.display.flip()
+            index = 0
+            while index<num:
+                if self.hexagons[sorted_cluster_elements[index]].is_team_base:
+                    num+=1
+                else:
+                    time.sleep(TIME_PER_ATTACK)
+                    self.simple_change_color(sorted_cluster_elements[index], attack_color_id)
+                    self.draw()
+                    self.count_colors()
+                    self.draw_status()
+                    pygame.display.flip()
+                index+=1
             print(sorted_cluster_elements)
             print("---")
 

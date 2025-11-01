@@ -21,13 +21,13 @@ def draw_line(surface, line_start, line_end, line_color_id):
         dy /= length
 
         # Количество треугольников (зависит от длины линии)
-        num_triangles = max(3, int(length / 20))
+        num_triangles = max(3, int(length / 25))
 
         current_time = time.time()
-        phase = (current_time * (-1.0)* ANIMATION_SPEED) % 1.0  # Фаза от 0 до 1
+        phase = (current_time * ANIMATION_SPEED / (1.0*length)) % 1.0  # Фаза от 0 до 1
 
         # Фиксированный размер треугольника (максимальный из предыдущего кода)
-        triangle_size = 12  # 8 + 4 = 12 (максимальный размер из предыдущего кода)
+        triangle_size = 15  # 8 + 4 = 12 (максимальный размер из предыдущего кода)
 
         # Фиксированный цвет треугольника (золотой)
         triangle_color = HEX_COLORS[line_color_id]  # Золотой цвет
@@ -57,7 +57,7 @@ def draw_line(surface, line_start, line_end, line_color_id):
             pygame.draw.polygon(surface, triangle_color, points)
 
             # Обводка треугольника
-            pygame.draw.polygon(surface, (255, 255, 255), points, 1)
+            pygame.draw.polygon(surface, (0, 0, 0), points, 3)
 
     # Рисуем точки на концах линии
     pygame.draw.circle(surface, (255, 255, 255), line_start, 2)

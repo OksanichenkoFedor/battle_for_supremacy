@@ -153,15 +153,16 @@ def main():
                     # Завершение рисования линии
                     id = field.contains_point(pygame.mouse.get_pos())
                     if id != -1:
-                        defend_color_id = field.hexagons[id].color_id
-                        field.attack(attack_color_id, defend_color_id)
-                        field.update()
-                        field.draw()
-                        painting.draw()
-                        load_button.draw()
-                        attack_button.draw()
-                        field.draw_status()
-                        line_end = pygame.mouse.get_pos()
+                        if field.hexagons[id].color_id != -1:
+                            defend_color_id = field.hexagons[id].color_id
+                            field.attack(attack_color_id, defend_color_id)
+                            field.update()
+                            field.draw()
+                            painting.draw()
+                            load_button.draw()
+                            attack_button.draw()
+                            field.draw_status()
+                            line_end = pygame.mouse.get_pos()
                     else:
                         line_end = None
                     drawing_line = False
