@@ -3,7 +3,11 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from consts import HEX_COLORS, HEX_COLORS_NAMES, ADMIN_ID, HEX_COLORS_DICT
 
-bot = telebot.TeleBot("7539891901:AAGF7OIwnxoSH3lrbV0aFetRm8tyiJeADmQ", parse_mode=None)
+file = open("token.txt")
+token = file.read().replace("\n","")
+file.close()
+
+bot = telebot.TeleBot(token, parse_mode=None)
 ids_colors = {}
 
 
@@ -75,17 +79,20 @@ def handle_color_selection(call):
         print(f"Цвет: {color_name}")
         print("=" * 30)
         """
+        print("Нажали на кнопку")
         if color_name in colors_used:
             bot.send_message(
                 call.from_user.id,
                 "Этот цвет уже выбран"
             )
-        if call.from_user.id in id_to_color:
+            print("Попытка на выбранный цвет @" + str(call.from_user.username))
+        elif call.from_user.id in id_to_color:
             curr = COLOR_DATA[id_to_color[call.from_user.id]]
             bot.send_message(
                 call.from_user.id,
                 "Вы не можете повторно регистрироваться.\nВы уже зарегистрированы.\nВаш цвет:"+curr["emoj"]
             )
+            print("Попытка повторной регистрации @"+str(call.from_user.username))
         else:
             colors_used.append(color_name)
             name = ""
@@ -110,15 +117,15 @@ def handle_color_selection(call):
                 call.from_user.id,
                 "Вы были зарегистрированы!\nВаш цвет:" + COLOR_DATA[color_name]["emoj"]
             )
-        for admin_name in ADMIN_ID:
-            bot.send_message(
-                ADMIN_ID[admin_name],
-                f"Выбран цвет: {COLOR_DATA[color_name]["emoj"]}\n"
-                f"Номер кнопки: {COLOR_DATA[color_name]["num_in_arr"]}\n"
-                f"ID выбравшего: {COLOR_DATA[color_name]["id"]}\n"
-                f"username выбравшего: {COLOR_DATA[color_name]["user_name"]}\n"
-                f"Фамилия Имя выбравшего: {COLOR_DATA[color_name]["name"]}\n"
-            )
+            for admin_name in ADMIN_ID:
+                bot.send_message(
+                    ADMIN_ID[admin_name],
+                    f"Выбран цвет: {COLOR_DATA[color_name]["emoj"]}\n"
+                    f"Номер кнопки: {COLOR_DATA[color_name]["num_in_arr"]}\n"
+                    f"ID выбравшего: {COLOR_DATA[color_name]["id"]}\n"
+                    f"username выбравшего: {COLOR_DATA[color_name]["user_name"]}\n"
+                    f"Фамилия Имя выбравшего: {COLOR_DATA[color_name]["name"]}\n"
+                )
 
 
 # Обработчик текстовых сообщений (для демонстрации)
@@ -132,6 +139,9 @@ def handle_text_messages(message):
                 "Пишет: "+curr["emoj"]+"\n"+curr["name"]+"\nТекст:\n"+
                 message.text
             )
+        print("---")
+        print("Пишет юзер: "+curr["emoj"]+"\n"+curr["name"]+"\nТекст:\n"+message.text)
+
     elif message.from_user.id in ADMIN_ID.values():
         for user_id in id_to_color:
             bot.send_message(
@@ -145,18 +155,7 @@ def handle_text_messages(message):
                     ADMIN_ID[admin_name],
                     "Пишет админ \nТекст:\n"+message.text
                 )
-
-'''
-@bot.message_handler(content_types=['text'])
-def handle_text_messages(message):
-    # Выводим информацию о сообщении в консоль
-    print(f"=== Новое сообщение ===")
-    print(f"Время: {message.date}")
-    print(f"ID пользователя: {message.from_user.id}")
-    print(f"Имя: {message.from_user.first_name}")
-    print(f"Фамилия: {message.from_user.last_name}")
-    print(f"Username: @{message.from_user.username}")
-    print(f"Текст сообщения: {message.text}")
-    print("=" * 30)
-'''
+        print("---")
+        print("Пишет админ \nТекст:\n" + message.text)
+print('Бот запущен')
 bot.polling()
